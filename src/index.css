@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Sora", sans-serif;
+}
+
+/* Scroll-to-top "drip" entrance */
+@keyframes dripFall {
+  0% {
+    transform: translateY(-48px) scaleY(0.4) scaleX(0.6);
+    opacity: 0;
+    border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+  }
+  55% {
+    transform: translateY(8px) scaleY(1.15) scaleX(0.92);
+    opacity: 1;
+    border-radius: 9999px;
+  }
+  75% {
+    transform: translateY(-4px) scaleY(0.95) scaleX(1.02);
+  }
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+    opacity: 1;
+    border-radius: 9999px;
+  }
+}
+.drip-in {
+  animation: dripFall 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.caret {
+  animation: blink 1s step-start infinite;
+}
+
+/* Subtle, minimal tilt — used only on project cards */
+.tilt-card {
+  transition: transform 0.2s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
