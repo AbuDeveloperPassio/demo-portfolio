@@ -5,7 +5,7 @@ const LINKS = ['Home', 'About', 'Skills', 'Education', 'Work', 'Contact']
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-slate-200 py-12">
-      <div className="max-w-6xl mx-auto px-6 grid sm:grid-cols-3 gap-10">
+      <div className="w-4/5 mx-auto px-6 grid sm:grid-cols-3 gap-10">
         <div>
           <h3 className="font-bold text-lg">Abdur Rahman's Portfolio</h3>
           <p className="text-slate-500 mt-2 text-sm">

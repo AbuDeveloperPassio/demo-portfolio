@@ -1,6 +1,7 @@
 import { useTypewriter } from '../hooks/useTypewriter'
 import ParticleField from './ParticleField'
 import Social from './Social'
+import TiltCard from './TiltCard'
 
 export default function Hero() {
   const typed = useTypewriter('Backend Development')
@@ -9,7 +10,7 @@ export default function Hero() {
     <section id="home" className="relative bg-[#F7F7FB] overflow-hidden min-h-[92vh] flex items-center">
       <ParticleField />
 
-      <div className="relative w-full max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 items-center gap-12">
+      <div className="relative w-4/5 mx-auto px-6 py-16 grid md:grid-cols-2 items-center gap-12">
         <div>
           <h1 className="font-display text-4xl md:text-5xl font-extrabold text-indigo-950 leading-tight">
             Hi There,
@@ -25,8 +26,8 @@ export default function Hero() {
             </span>
           </p>
 
-          <a
-            href="#about"
+          
+         <a   href="#about"
             className="inline-block mt-6 bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full shadow-md
                        hover:bg-indigo-800 transition-colors"
           >
@@ -44,9 +45,11 @@ export default function Hero() {
         </div>
 
         <div className="flex justify-center">
-          <div className="w-72 h-72 md:w-96 md:h-96 rounded-full bg-amber-400 flex items-center justify-center text-7xl shadow-xl">
-            👋
+          <TiltCard>
+          <div className="w-[600px] h-[600px] rounded-full bg-amber-400 flex items-center justify-center text-[120px] shadow-xl">
+               👨
           </div>
+          </TiltCard>
         </div>
       </div>
     </section>

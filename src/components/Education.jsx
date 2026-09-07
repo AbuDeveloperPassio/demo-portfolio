@@ -21,8 +21,8 @@ const EDUCATION = [
 
 export default function Education() {
   return (
-    <section id="education" className="bg-[#F0F1FB] py-20 fade-up">
-      <div className="max-w-4xl mx-auto px-6">
+    <section id="education" className="bg-[#F0F1FB] py-40 fade-up">
+      <div className="w-4/5 mx-auto px-6">
         <h2 className="font-display text-3xl font-bold text-center flex items-center gap-2 justify-center">
           🎓 My <span className="text-indigo-700">Education</span>
         </h2>
@@ -32,7 +32,7 @@ export default function Education() {
 
         <div className="mt-10 flex flex-col gap-5">
           {EDUCATION.map((e) => (
-            <div key={e.title} className="bg-white rounded-xl shadow-sm flex overflow-hidden">
+            <div key={e.title} className="bg-white rounded-xl shadow-sm flex overflow-hidden min-h-40">
               <div className="w-28 md:w-40 bg-indigo-100 flex items-center justify-center text-4xl shrink-0">
                 {e.icon}
               </div>

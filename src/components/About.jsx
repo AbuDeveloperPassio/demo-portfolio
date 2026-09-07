@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <section id="about" className="max-w-6xl mx-auto px-6 py-20 fade-up">
+    <section id="about" className="w-4/5 mx-auto px-6 py-60 fade-up">
       <h2 className="font-display text-3xl font-bold flex items-center gap-2 justify-center md:justify-start">
         👤 About <span className="text-indigo-700">Me</span>
       </h2>
