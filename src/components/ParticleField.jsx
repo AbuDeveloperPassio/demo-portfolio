@@ -1,8 +1,5 @@
 import { useEffect, useRef } from 'react'
 
-// A particle network that fills the hero. Particles never fade — instead,
-// whenever the cursor gets close, they're physically pushed outward, so a
-// clean circular gap opens around the pointer and drifts along with it.
 export default function ParticleField() {
   const canvasRef = useRef(null)
   const wrapRef = useRef(null)
@@ -16,121 +13,279 @@ export default function ParticleField() {
     let raf = null
     let width = 0
     let height = 0
-    const mouse = { x: -9999, y: -9999, active: false }
-    const CLEAR_RADIUS = 240
-    const PUSH_STRENGTH = 16
-    const LINK_DIST = 160
 
-    function resize() {
-      width = wrap.clientWidth
-      height = wrap.clientHeight
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      canvas.style.width = width + 'px'
-      canvas.style.height = height + 'px'
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-
-      const count = Math.min(320, Math.max(120, Math.floor((width * height) / 5000)))
-      particles = Array.from({ length: count }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 1.2,
-        vy: (Math.random() - 0.5) * 1.2,
-      }))
+    const mouse = {
+      x: -9999,
+      y: -9999,
+      active: false,
     }
 
-    function step() {
-      ctx.clearRect(0, 0, width, height)
+    const CLEAR_RADIUS = 240
+    const PUSH_STRENGTH = 35
+    const LINK_DIST = 250
+    const PARTICLE_SIZE = 4
 
-      for (const p of particles) {
-        // ambient drift
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x <= 0 || p.x >= width) p.vx *= -1
-        if (p.y <= 0 || p.y >= height) p.vy *= -1
+    function resize() {
+      width = canvas.width = wrap.offsetWidth
+      height = canvas.height = wrap.offsetHeight
 
-        // push the particle out of the cursor's circle, instead of hiding it
+      init()
+    }
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width
+        this.y = Math.random() * height
+
+        this.vx = (Math.random() - 0.5) * 2
+        this.vy = (Math.random() - 0.5) * 2
+      }
+
+      update() {
+        this.x += this.vx
+        this.y += this.vy
+
+        // Bounce off walls
+        if (this.x < 0 || this.x > width) {
+          this.vx *= -1
+        }
+
+        if (this.y < 0 || this.y > height) {
+          this.vy *= -1
+        }
+
+        // Keep particles inside canvas
+        this.x = Math.max(0, Math.min(width, this.x))
+        this.y = Math.max(0, Math.min(height, this.y))
+
+        // Mouse push effect
         if (mouse.active) {
-          const dx = p.x - mouse.x
-          const dy = p.y - mouse.y
-          const dist = Math.hypot(dx, dy) || 0.0001
-          if (dist < CLEAR_RADIUS) {
-            const force = (1 - dist / CLEAR_RADIUS) * PUSH_STRENGTH
-            p.x += (dx / dist) * force
-            p.y += (dy / dist) * force
-            p.x = Math.min(Math.max(p.x, 0), width)
-            p.y = Math.min(Math.max(p.y, 0), height)
+          const dx = this.x - mouse.x
+          const dy = this.y - mouse.y
+
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          if (dist < CLEAR_RADIUS && dist > 0) {
+            const angle = Math.atan2(dy, dx)
+
+            const force =
+              (1 - dist / CLEAR_RADIUS) * PUSH_STRENGTH
+
+            this.vx += Math.cos(angle) * force
+            this.vy += Math.sin(angle) * force
+          }
+        }
+
+        // Damping
+        this.vx *= 0.99
+        this.vy *= 0.99
+
+        // Prevent particles from becoming too fast
+        const maxSpeed = 3
+
+        this.vx = Math.max(
+          -maxSpeed,
+          Math.min(maxSpeed, this.vx)
+        )
+
+        this.vy = Math.max(
+          -maxSpeed,
+          Math.min(maxSpeed, this.vy)
+        )
+      }
+
+      draw() {
+        // GRAY PARTICLES
+        ctx.fillStyle = 'rgba(110, 110, 110, 1)'
+        
+
+        ctx.beginPath()
+
+        ctx.arc(
+          this.x,
+          this.y,
+          PARTICLE_SIZE,
+          0,
+          Math.PI * 2
+        )
+
+        ctx.fill()
+      }
+    }
+
+    function init() {
+      particles = []
+
+      const particleCount = Math.floor(
+        (width * height) / 15000
+      )
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle())
+      }
+    }
+
+    function drawLines() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx =
+            particles[i].x - particles[j].x
+
+          const dy =
+            particles[i].y - particles[j].y
+
+          const dist = Math.sqrt(
+            dx * dx + dy * dy
+          )
+
+          if (dist < LINK_DIST) {
+            const opacity =
+              (1 - dist / LINK_DIST) * 0.6
+
+            // GRAY CONNECTING LINES
+            ctx.strokeStyle = `rgba(120, 120, 120, ${opacity})`
+
+            ctx.lineWidth = 1.5
+
+            ctx.beginPath()
+
+            ctx.moveTo(
+              particles[i].x,
+              particles[i].y
+            )
+
+            ctx.lineTo(
+              particles[j].x,
+              particles[j].y
+            )
+
+            ctx.stroke()
           }
         }
       }
-
-      // links
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i]
-          const b = particles[j]
-          const dx = a.x - b.x
-          const dy = a.y - b.y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist >= LINK_DIST) continue
-
-          const alpha = (1 - dist / LINK_DIST) * 0.4
-          ctx.beginPath()
-          ctx.moveTo(a.x, a.y)
-          ctx.lineTo(b.x, b.y)
-         ctx.strokeStyle = `rgba(150, 150, 150, ${alpha})`
-          ctx.lineWidth = 1
-          ctx.stroke()
-        }
-      }
-
-      // dots
-      for (const p of particles) {
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2)
-       ctx.fillStyle = 'rgba(125, 125, 125, 0.55)'
-        
-        ctx.fill()
-      }
-
-      raf = requestAnimationFrame(step)
     }
 
-    function onPointerMove(e) {
-      const rect = wrap.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height
-      mouse.x = x
-      mouse.y = y
-      mouse.active = inside
+    function animate() {
+      // Clear canvas
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      )
+
+      // Very subtle white fade
+      ctx.fillStyle =
+        'rgba(255, 255, 255, 0.02)'
+
+      ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+      )
+
+      // Update + draw particles
+      for (const particle of particles) {
+        particle.update()
+        particle.draw()
+      }
+
+      // Draw connections
+      drawLines()
+
+      raf = requestAnimationFrame(animate)
     }
-    function onPointerLeave() {
+
+    // Mouse movement
+    const handleMouseMove = (e) => {
+      const rect =
+        canvas.getBoundingClientRect()
+
+      mouse.x =
+        e.clientX - rect.left
+
+      mouse.y =
+        e.clientY - rect.top
+    }
+
+    const handleMouseEnter = () => {
+      mouse.active = true
+    }
+
+    const handleMouseLeave = () => {
       mouse.active = false
+
+      mouse.x = -9999
+      mouse.y = -9999
     }
 
-    const ro = new ResizeObserver(resize)
-    ro.observe(wrap)
+    // Initial setup
     resize()
-    raf = requestAnimationFrame(step)
+    animate()
 
-    // Listen on the whole window, not just this layer, so the cursor is
-    // still tracked when it's over the avatar/text stacked on top of it.
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerleave', onPointerLeave)
+    // Events
+    wrap.addEventListener(
+      'mousemove',
+      handleMouseMove
+    )
 
+    wrap.addEventListener(
+      'mouseenter',
+      handleMouseEnter
+    )
+
+    wrap.addEventListener(
+      'mouseleave',
+      handleMouseLeave
+    )
+
+    window.addEventListener(
+      'resize',
+      resize
+    )
+
+    // Cleanup
     return () => {
+      wrap.removeEventListener(
+        'mousemove',
+        handleMouseMove
+      )
+
+      wrap.removeEventListener(
+        'mouseenter',
+        handleMouseEnter
+      )
+
+      wrap.removeEventListener(
+        'mouseleave',
+        handleMouseLeave
+      )
+
+      window.removeEventListener(
+        'resize',
+        resize
+      )
+
       cancelAnimationFrame(raf)
-      ro.disconnect()
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerleave', onPointerLeave)
     }
   }, [])
 
   return (
-    <div ref={wrapRef} className="absolute inset-0">
-      <canvas ref={canvasRef} className="w-full h-full" />
+    <div
+      ref={wrapRef}
+      className="absolute inset-0 w-full h-full"
+      style={{
+        cursor: 'crosshair',
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        style={{
+          display: 'block',
+        }}
+      />
     </div>
   )
 }
