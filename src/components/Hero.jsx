@@ -50,9 +50,13 @@ export default function Hero() {
           {/* Emoji Circle - Bottom on Mobile */}
           <div className="md:order-2 flex justify-center w-full md:w-auto">
             <TiltCard>
-              <div className="w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full bg-amber-400 flex items-center justify-center text-7xl sm:text-8xl md:text-[120px] shadow-xl">
-                👨
-              </div>
+             <div className="w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-full overflow-hidden">
+  <img
+    src="/images/hero.png"
+    alt="Profile"
+    className="w-full h-full object-cover"
+  />
+</div>
             </TiltCard>
           </div>
         </div>
