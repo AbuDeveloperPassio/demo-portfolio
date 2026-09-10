@@ -1,165 +1,144 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
 export default function ParticleField() {
-  const canvasRef = useRef(null)
-  const wrapRef = useRef(null)
+  const canvasRef = useRef(null);
+  const wrapRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    const wrap = wrapRef.current
-    const ctx = canvas.getContext('2d')
+    const canvas = canvasRef.current;
+    const wrap = wrapRef.current;
+    const ctx = canvas.getContext("2d");
 
-    let particles = []
-    let raf = null
-    let width = 0
-    let height = 0
+    let particles = [];
+    let raf = null;
+    let width = 0;
+    let height = 0;
 
     const mouse = {
       x: -9999,
       y: -9999,
       active: false,
-    }
+    };
 
-    const CLEAR_RADIUS = 240
-    const PUSH_STRENGTH = 35
-    const LINK_DIST = 250
-    const PARTICLE_SIZE = 4
+    const PARTICLE_SIZE = 4;
+    const LINK_DIST = 200;
+    const CLEAR_RADIUS = 50;
+    const PUSH_STRENGTH = 5;
 
     function resize() {
-      width = canvas.width = wrap.offsetWidth
-      height = canvas.height = wrap.offsetHeight
+      width = canvas.width = wrap.offsetWidth;
+      height = canvas.height = wrap.offsetHeight;
 
-      init()
+      init();
     }
 
     class Particle {
       constructor() {
-        this.x = Math.random() * width
-        this.y = Math.random() * height
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
 
-        this.vx = (Math.random() - 0.5) * 2
-        this.vy = (Math.random() - 0.5) * 2
+       this.vx = (Math.random() - 0.5) * 15;
+this.vy = (Math.random() - 0.5) * 15;
       }
 
       update() {
-        this.x += this.vx
-        this.y += this.vy
+        this.x += this.vx;
+        this.y += this.vy;
 
         // Bounce off walls
         if (this.x < 0 || this.x > width) {
-          this.vx *= -1
+          this.vx *= -1;
         }
 
         if (this.y < 0 || this.y > height) {
-          this.vy *= -1
+          this.vy *= -1;
         }
 
         // Keep particles inside canvas
-        this.x = Math.max(0, Math.min(width, this.x))
-        this.y = Math.max(0, Math.min(height, this.y))
+        this.x = Math.max(0, Math.min(width, this.x));
+        this.y = Math.max(0, Math.min(height, this.y));
 
         // Mouse push effect
         if (mouse.active) {
-          const dx = this.x - mouse.x
-          const dy = this.y - mouse.y
+          const dx = this.x - mouse.x;
+          const dy = this.y - mouse.y;
 
-          const dist = Math.sqrt(dx * dx + dy * dy)
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < CLEAR_RADIUS && dist > 0) {
-            const angle = Math.atan2(dy, dx)
+            const angle = Math.atan2(dy, dx);
 
-            const force =
-              (1 - dist / CLEAR_RADIUS) * PUSH_STRENGTH
+            const force = (1 - dist / CLEAR_RADIUS) * PUSH_STRENGTH;
 
-            this.vx += Math.cos(angle) * force
-            this.vy += Math.sin(angle) * force
+            this.vx += Math.cos(angle) * force;
+            this.vy += Math.sin(angle) * force;
           }
         }
 
-        // Damping
-        this.vx *= 0.99
-        this.vy *= 0.99
+        // Damping - minimal so particles keep moving forever
+     this.vx *= 0.98;
+this.vy *= 0.98;
+
+        // Random energy boost to keep particles moving
+      if (Math.random() < 0.09) {
+       this.vx += (Math.random() - 0.5) * 2.5;
+this.vy += (Math.random() - 0.5) * 2.5;
+        }
 
         // Prevent particles from becoming too fast
-        const maxSpeed = 3
+       const maxSpeed = 20;
 
-        this.vx = Math.max(
-          -maxSpeed,
-          Math.min(maxSpeed, this.vx)
-        )
+        this.vx = Math.max(-maxSpeed, Math.min(maxSpeed, this.vx));
 
-        this.vy = Math.max(
-          -maxSpeed,
-          Math.min(maxSpeed, this.vy)
-        )
+        this.vy = Math.max(-maxSpeed, Math.min(maxSpeed, this.vy));
       }
 
       draw() {
-        // GRAY PARTICLES
-        ctx.fillStyle = 'rgba(110, 110, 110, 1)'
-        
+        // LIGHTER GRAY PARTICLES
+        ctx.fillStyle = "rgba(150, 150, 150, 0.8)";
 
-        ctx.beginPath()
+        ctx.beginPath();
 
-        ctx.arc(
-          this.x,
-          this.y,
-          PARTICLE_SIZE,
-          0,
-          Math.PI * 2
-        )
+        ctx.arc(this.x, this.y, PARTICLE_SIZE, 0, Math.PI * 2);
 
-        ctx.fill()
+        ctx.fill();
       }
     }
 
     function init() {
-      particles = []
+      particles = [];
 
-      const particleCount = Math.floor(
-        (width * height) / 15000
-      )
+      const particleCount = Math.floor((width * height) / 10000);
 
       for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle())
+        particles.push(new Particle());
       }
     }
 
     function drawLines() {
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dx =
-            particles[i].x - particles[j].x
+          const dx = particles[i].x - particles[j].x;
 
-          const dy =
-            particles[i].y - particles[j].y
+          const dy = particles[i].y - particles[j].y;
 
-          const dist = Math.sqrt(
-            dx * dx + dy * dy
-          )
+          const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < LINK_DIST) {
-            const opacity =
-              (1 - dist / LINK_DIST) * 0.6
+            const opacity = (1 - dist / LINK_DIST) * 0.6;
 
-            // GRAY CONNECTING LINES
-            ctx.strokeStyle = `rgba(120, 120, 120, ${opacity})`
+            // LIGHTER CONNECTING LINES
+            ctx.strokeStyle = `rgba(160, 160, 160, ${opacity})`;
 
-            ctx.lineWidth = 1.5
+            ctx.lineWidth = 1.5;
 
-            ctx.beginPath()
+            ctx.beginPath();
 
-            ctx.moveTo(
-              particles[i].x,
-              particles[i].y
-            )
+            ctx.moveTo(particles[i].x, particles[i].y);
 
-            ctx.lineTo(
-              particles[j].x,
-              particles[j].y
-            )
+            ctx.lineTo(particles[j].x, particles[j].y);
 
-            ctx.stroke()
+            ctx.stroke();
           }
         }
       }
@@ -167,125 +146,87 @@ export default function ParticleField() {
 
     function animate() {
       // Clear canvas
-      ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-      )
+      ctx.clearRect(0, 0, width, height);
 
       // Very subtle white fade
-      ctx.fillStyle =
-        'rgba(255, 255, 255, 0.02)'
+      ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
 
-      ctx.fillRect(
-        0,
-        0,
-        width,
-        height
-      )
+      ctx.fillRect(0, 0, width, height);
 
       // Update + draw particles
       for (const particle of particles) {
-        particle.update()
-        particle.draw()
+        particle.update();
+        particle.draw();
       }
 
       // Draw connections
-      drawLines()
+      drawLines();
 
-      raf = requestAnimationFrame(animate)
+      raf = requestAnimationFrame(animate);
     }
 
     // Mouse movement
     const handleMouseMove = (e) => {
-      const rect =
-        canvas.getBoundingClientRect()
+      const rect = canvas.getBoundingClientRect();
 
-      mouse.x =
-        e.clientX - rect.left
+      mouse.x = e.clientX - rect.left;
 
-      mouse.y =
-        e.clientY - rect.top
-    }
+      mouse.y = e.clientY - rect.top;
+    };
 
     const handleMouseEnter = () => {
-      mouse.active = true
-    }
+      mouse.active = true;
+    };
 
     const handleMouseLeave = () => {
-      mouse.active = false
+      mouse.active = false;
 
-      mouse.x = -9999
-      mouse.y = -9999
-    }
+      mouse.x = -9999;
+      mouse.y = -9999;
+    };
 
     // Initial setup
-    resize()
-    animate()
+    resize();
+    animate();
 
     // Events
-    wrap.addEventListener(
-      'mousemove',
-      handleMouseMove
-    )
+    wrap.addEventListener("mousemove", handleMouseMove);
 
-    wrap.addEventListener(
-      'mouseenter',
-      handleMouseEnter
-    )
+    wrap.addEventListener("mouseenter", handleMouseEnter);
 
-    wrap.addEventListener(
-      'mouseleave',
-      handleMouseLeave
-    )
+    wrap.addEventListener("mouseleave", handleMouseLeave);
 
-    window.addEventListener(
-      'resize',
-      resize
-    )
+    window.addEventListener("resize", resize);
 
     // Cleanup
     return () => {
-      wrap.removeEventListener(
-        'mousemove',
-        handleMouseMove
-      )
+      wrap.removeEventListener("mousemove", handleMouseMove);
 
-      wrap.removeEventListener(
-        'mouseenter',
-        handleMouseEnter
-      )
+      wrap.removeEventListener("mouseenter", handleMouseEnter);
 
-      wrap.removeEventListener(
-        'mouseleave',
-        handleMouseLeave
-      )
+      wrap.removeEventListener("mouseleave", handleMouseLeave);
 
-      window.removeEventListener(
-        'resize',
-        resize
-      )
+      window.removeEventListener("resize", resize);
 
-      cancelAnimationFrame(raf)
-    }
-  }, [])
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   return (
     <div
       ref={wrapRef}
       className="absolute inset-0 w-full h-full"
       style={{
-        cursor: 'crosshair',
+        cursor: "crosshair",
       }}
     >
       <canvas
         ref={canvasRef}
         className="w-full h-full"
         style={{
-          display: 'block',
+          display: "block",
         }}
       />
     </div>
-  )
+  );
 }

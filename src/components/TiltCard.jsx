@@ -1,7 +1,5 @@
 import { useRef } from 'react'
 
-// Subtle corner-lift tilt. Max rotation is kept small (6deg) so it reads as
-// a gentle, minimal interaction rather than a heavy 3D flip.
 export default function TiltCard({ children, className = '' }) {
   const ref = useRef(null)
 
@@ -12,9 +10,9 @@ export default function TiltCard({ children, className = '' }) {
     const y = e.clientY - rect.top
     const cx = rect.width / 2
     const cy = rect.height / 2
-    const rotateY = ((x - cx) / cx) * 50
-    const rotateX = -((y - cy) / cy) * 50
-    el.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`
+    const rotateY = -((x - cx) / cx) * 12
+    const rotateX = ((y - cy) / cy) * 12
+    el.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`
   }
 
   function onLeave() {
